@@ -1,0 +1,21 @@
+/* 
+ *
+ * Project: PetPoter
+ * File: user.master.js
+ * Purpose: user for the application - Collection Name: user
+ */
+
+var mongoose = require('mongoose');
+var schema = new mongoose.Schema({
+    mobile: {type: String,default:''},
+    password: {type: String,default:''},
+    name: {type: String,default:''},
+    countryCode: {type: String,default:'+1'},
+    email: {type: String,default:''},
+    stripeCustId: {type: String,default:''},
+    regStatus: {type: Number,default:0},
+    created:{type: Date, default: Date.now},
+    updated:{type: Date},
+    isDelete:{type: Date}
+},{ collection: 'user' });
+module.exports = mongoose.model('user', schema);
