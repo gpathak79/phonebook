@@ -3,6 +3,12 @@ const express = require('express'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser');
 env = require('dotenv').config();
+global.path=require('path');
+global.fs=require('fs');
+global.multer=require('multer');
+
+global.multiparty=require('multiparty');
+global.Joi = require('joi');
 global.jwt = require("jsonwebtoken");
 global.bcrypt = require('bcryptjs');
 global.geodist = require('geodist');
