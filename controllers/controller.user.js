@@ -81,11 +81,15 @@ exports.Registration = (req, res) => {
         //Check mobile no. in database
         const mobileCheck = new Promise( (resolve, reject) => {
             User.find({'mobileNo': req.body.mobileNo}, (err, results) => {
+                
                 if(err) {
                     reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
                 } else {
-                    !results.length ? resolve(1) : reject({ 'message': 'Mobile Number already Registered', 'code': 210,"httpCode":200})
+
+                    results.length ? reject({ 'message': 'Mobile Number already Registered', 'code': 210,"httpCode":200}): resolve(1) 
+                    console.log(results.length);
                 }
+
             });
         });
         //check email in database
@@ -144,6 +148,9 @@ exports.Login = (req, res) => {
         /* check user mobile in database*/
         var mobileCheck = new Promise(function (resolve, reject) {
             User.find({'mobileNo': req.body.mobileNo}, function (err, results) {
+
+
+                console.log(results);
                 if (err) {
                     reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage })
                 } else {
@@ -234,13 +241,8 @@ exports.UpdateUser = (req,res)=>{
             res.status(err.httpCode).json(err);
         });  
 
-
-
-       
-
-
     }
-    catch (e) {
+    catch (e) { 
         res.status(500).json({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
         console.log('catch login', e);
     }
@@ -407,6 +409,7 @@ exports.UpdateContact = (req, res) => {
 
 exports.DeleteContact = (req, res) => {
     try {
+        //check user id and contact id
         const DeleteId = new Promise((resolve, reject) => {
             contactDetail.find({'userId': req.userId, '_id': req.body.userId}, (err, results) => {
                 if(err) {
@@ -455,20 +458,40 @@ exports.DeleteContact = (req, res) => {
 
 exports.getAllContact = (req, res) => {
     try {
-        const getId = new Promise((resolve, reject) => {
-            contactDetail.find({'userId': req.userId}, (err, results) => {
+            const getId = new Promise((resolve, reject) => {
+
+                //check user id and limit
+                // let pageLimit = parseInt(req.query.limit);
+                var pageNo = parseInt(req.query.pageNo)
+                 var size = parseInt(req.query.size)
+                 var query={};
+
+                 if(pageNo < 0 || pageNo === 0) {
+                    response = {"error" : true,"message" : "invalid page number, should start with 1"};
+                    return res.json(response)
+              }
+
+                //  query.skip = size * (pageNo - 1)
+                // query.limit = size
+
+                console.log(query.skip);
+            contactDetail.find({'userId': req.userId,}, query,(err, results) => {
+              
                 if(err) {
+
                     reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
                 } else {
+                    
                     !results.length ? reject({ 'message': 'Contact Not Found', 'code': 210,"httpCode":200}) :
                     resolve(results);
-                }
-            });
-        });
-           
-
-        
+                    
+                  }
+            
+            }).limit(size).skip(size * (pageNo - 1));
+        })
             getId.then((results) => {
+
+                
                 res.send({'code':200,'message':'Success','data':results,'isNext':true,'Limit':3});
             })
                 
@@ -484,67 +507,88 @@ exports.getAllContact = (req, res) => {
 }
 
 
+
+
+
+
 //upload Image
 
-// exports.mediaUpload = (req, res) => {
-//     try {
-// var form =new multiparty.Form();
-// form.parse(req, function(err, rawBody, files){
-// var imageProcessing = new Promise((resolve, reject) => {
-    
-//     if((files.file) && files.file.length > 0) {
-//         var fileName = '';
-//         var newfilename = '';
-//         var ext = '';
-//         fileName = files.file[0].originalFilename;
-//         ext = path.extname(fileName);
-//         newfilename = Date.now() + ext;
-// //console.log(newfilename);
-// fs.readFile(files.file[0].path, function(err, fileData) {
-//     if (err) {
-//         reject({httpCode: 400,code: 400,message: 'try again!'});
-//     }
-//     var pathNew = process.env.USERPROFILEIMAGEPATH + newfilename;
-//     fs.writeFile(pathNew, fileData, function(err) {
-//         if (err) {
-//             console.log('err',err)
-//             reject({httpCode: 400,code: 400,message: 'Try again!'});
-//         }
-//         resolve(process.env.USERPROFILEPATHVIEW + newfilename);
-//     });
-// });
-// }
-// else{
-//     reject({httpCode: 400,code: 400,message: 'image not send!'});
-// }
-// });
-// Promise.all([imageProcessing]).then(function(results) {
-
-// res.status(200).json({ 'code': 200, 'message': 'Sucess!.','url': results[0]});
-//     }).catch(function(err) {
-// console.log('catch err',err);
-// res.status(err.httpCode).json(err);
-// });
-// })
-//     } catch (e) {
-// console.log('catch profileNew',e);
-//     }
-// }
-
-
 exports.mediaUpload = (req, res) => {
-    if(!req.file) {
-      res.status(500).json({httpCode: 400,code: 400,message: 'try again!'})
+    try {
+var form =new multiparty.Form();
+form.parse(req, function(err, rawBody, files){
+var imageProcessing = new Promise((resolve, reject) => {
+    
+    if((files.file) && files.file.length > 0) {
+        var fileName = '';
+        var newfilename = '';
+        var ext = '';
+        fileName = files.file[0].originalFilename;
+        console.log(fileName);
+        ext = path.extname(fileName);
+        newfilename = Date.now() + ext;
+        console.log(newfilename);
+//console.log(newfilename);
+fs.readFile(files.file[0].path, function(err, fileData) {
+
+    console.log(fileData);
+    if (err) {
+       
+        reject({httpCode: 400,code: 400,message: 'try again!'});
     }
-    const fileName = 'http://localhost/phonebook.com/public/images' + req.file.filename;
-    User.update({'_id': req.userId}, {'imageURL': fileName}, (err, results) => {
-      if(err) {
-          if(err) return res.send({'code':210,'message':'Database error.','data':[]});
-      } else {
-          res.send({'code':200,'message':'Sucess.','filelink': fileName});
-      }
+    var pathNew = process.env.USERPROFILEIMAGEPATH + newfilename;
+    console.log(pathNew);
+    fs.writeFile(pathNew, fileData, function(err) {
+        if (err) {
+            console.log('err',err)
+            reject({httpCode: 400,code: 400,message: 'Try again!'});
+        }
+        resolve(process.env.USERPROFILEPATHVIEW + newfilename);
     });
-  }
+});
+}
+else{
+    reject({httpCode: 400,code: 400,message: 'image not send!'});
+}
+});
+Promise.all([imageProcessing]).then(function(results) {
+
+    console.log(results);
+
+    User.update({ '_id': req.userId}, {$set:{
+       "imageURL":results[0]
+     }
+        }, (err, result) => {
+        if(err) {
+            if(err) return res.send({'code':210,'message':'Database error.','data':[]});
+        } else {               
+            
+         res.status(200).json({ 'code': 200, 'message': 'Sucess!.','url': results[0]});
+        }
+    })
+
+
+
+
+
+    }).catch(function(err) {
+console.log('catch err',err);
+res.status(err.httpCode).json(err);
+});
+})
+    } catch (e) {
+console.log('catch profileNew',e);
+    }
+}
+
+
+//Change Image
+
+
+
+
+
+
 
 
 
