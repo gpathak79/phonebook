@@ -1,5 +1,5 @@
 const Joi = require('joi');
-exports.login = function (req, res, cb) {
+exports.login = function (req, res, next) {
   Joi.validate({
 
     "mobileNo":req.body.mobileNo,
@@ -16,7 +16,9 @@ exports.login = function (req, res, cb) {
             errorName: err.name
           });
         } else {
-          cb(null, true)
+          //  cb(null, false)
+          // console.log('hi');
+          next();
          } }
          )
   }

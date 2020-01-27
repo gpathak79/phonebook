@@ -113,8 +113,7 @@ exports.Registration = (req, res) => {
 
                 
                     User.create({
-
-                        
+  
                         "name": req.body.name,
                         "email": req.body.email,
                         "password": hash,
@@ -155,11 +154,11 @@ exports.Login = (req, res) => {
                     reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage })
                 } else {
                     !results.length ? reject({ 'message': 'Not found.', 'code': 210,"httpCode":200}) : resolve(results[0]);
-                }
+                }   
             })
         });
         Promise.all([mobileCheck]).then(function (results) {
-
+      
 
             bcrypt.compare(req.body.password, results[0].password, function(err, bcrypt_res) {
 
@@ -316,16 +315,36 @@ exports.AddContact=(req,res)=>{
     try{
 
         const mobileIdCheck = new Promise( (resolve, reject) => {
-            User.find({'mobileNo': req.body.mobileNo,'_id':req.userId}, (err, results) => {
+            contactDetail.find({'mobileNo': req.body.mobileNo}, (err, results) => {
+              
+             
                 if(err) {
                     reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
                 } else {
+
+                    
+
                     !results.length ? resolve(1) : reject({ 'message': 'Mobile Number already Registered', 'code': 210,"httpCode":200})
                 }
             });
         });
+        const emailIdCheck = new Promise( (resolve, reject) => {
+            contactDetail.find({'email': req.body.email}, (err, results) => {
+              
+             
+                if(err) {
+                    reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
+                } else {
 
-        Promise.all([mobileIdCheck]).then(() => {
+                        console.log(results);
+
+                    !results.length ? resolve(1) : reject({ 'message': 'Email Id  already Registered', 'code': 210,"httpCode":200})
+                }
+            });
+        });
+
+    Promise.all([mobileIdCheck,emailIdCheck]).then((results) => {
+
 
          contactDetail.create({
 
@@ -333,7 +352,7 @@ exports.AddContact=(req,res)=>{
                         "name":req.body.name,
                         "email":req.body.email,
                         "mobileNo":req.body.mobileNo,
-                        "countryCode":req.bodycountryCode
+                        "countryCode":req.body.countryCode
                         
                         
                         
@@ -341,12 +360,13 @@ exports.AddContact=(req,res)=>{
                         if(err) {
                             if(err) return res.send({'code':210,'message':'Database error.','data':[]});
                         } else {
-                            res.send({'code':200,'message':'Sucess.','data':{"userId":results.userId,"Name":results.name,"mobileNo":results.mobileNo,"Status":results.isStatus}});
+                            res.send({'code':200,'message':'Sucess.','data':{"userId":results.userId,"Name":results.name,"email":results.email,"mobileNo":results.mobileNo,"countryCode":results.countryCode,"Status":results.isStatus}});
+                        console.log(results);
                         }
                     });
                 
          
-        }).catch(function (err) {
+        }).catch(function (err) {   
                         console.log('errerrerrerr', err)
                         res.status(err.httpCode).json(err);
                     }); 
@@ -372,12 +392,13 @@ exports.UpdateContact = (req, res) => {
                 }
             });
         });
+        
            
 
         
             contactIdCheck
             .then((results) => {
-                console.log('results',results);
+              
                 contactDetail.update({'_id': results._id, 'userId': req.userId}, {$set:{
                 "name": req.body.name, 
                 
@@ -388,8 +409,9 @@ exports.UpdateContact = (req, res) => {
                 }, (err, result) => {
                 if(err) {
                     if(err) return res.send({'code':210,'message':'Database error.','data':[]});
-                } else {               
-                    res.send({'code':200,'message':'Sucess.','data':{"Name":result.name,"Email":result.email,"mobileNo":result.mobileNo,"Status":result.isStatus}});
+                } else {           
+                    console.log('updatecontact',results);    
+                    res.send({'code':200,'message':'Sucess.','data':{"Name":results.name,"Email":results.email,"mobileNo":results.mobileNo,"Status":results.isStatus}});
                 }
             })
         })
