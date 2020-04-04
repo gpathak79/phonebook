@@ -1,4 +1,6 @@
 const Joi = require('joi');
+
+
 exports.login = function (req, res, next) {
   Joi.validate({
 
@@ -51,7 +53,7 @@ exports.login = function (req, res, next) {
           } else {
             cb(null, true)
            } }
-           )
+           )     
     }
 //update password
 exports.updatePassword = function (req, res, cb) {
@@ -131,5 +133,48 @@ exports.updatePassword = function (req, res, cb) {
                )
         }
 
+
+//Event Filter
+
+
+
+exports.filters = function (req, res, cb) {
+
+  
+  Joi.validate({
+
+    
+
+   
+    "feedType":req.query.feedType,
+    "eventType":req.query.eventType,
+
+
+    
+
+  }, {
+
+    feedType:Joi.string().min(3).required(),
+    
+      eventType: Joi.string().min(3).required(),
+
+
+
+
+  }, (err, value) => {
+        if (err) {
+          return res.status(200).json({
+            message: err.details[0].message,
+            httpCode: 200,
+            code: 400,
+            errorName: err.name
+          });
+        } else {
+          cb(null, true)
+         } }
+         )
+  }
+
+  
 
    

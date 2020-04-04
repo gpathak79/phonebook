@@ -6,12 +6,12 @@ env = require('dotenv').config();
 global.path=require('path');
 global.fs=require('fs');
 global.multer=require('multer');
-
 global.multiparty=require('multiparty');
 global.Joi = require('joi');
 global.jwt = require("jsonwebtoken");
 global.bcrypt = require('bcryptjs');
 global.geodist = require('geodist');
+global.events = require("./models/eventfilter");
 global.User = require("./models/users");
 global.Address = require("./models/address");
 global.contactDetail = require("./models/contactDetail");

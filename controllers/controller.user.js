@@ -197,7 +197,7 @@ exports.UpdateUser = (req,res)=>{
 
     try{
 
-             //check user name in database
+             //check user id in database
              var username = new Promise(function (resolve, reject) {
                 User.find({'_id': req.userId}, function (err, results) {
                     if (err) {
@@ -444,7 +444,6 @@ exports.DeleteContact = (req, res) => {
         });
            
 
-        
             DeleteId
             .then((results) => {
 
@@ -603,9 +602,91 @@ console.log('catch profileNew',e);
     }
 }
 
+    //Event Filter
 
-//Change Image
+  exports.eventFilter = (req, res) => {
+    try {
+var isEmpty = function (value) {
+    if(value === undefined ||
+        value === null ||
+        (typeof(value) === 'object' && Object.keys(value).length === 0) ||
+        (typeof(value) === 'string' && value.trim().length === 0))
 
+        
+        return 1;
+        
+    else
+    return 0;
+}
+        const contactIdCheck = new Promise((resolve, reject) => {
+                console.log(isEmpty(req.query.feedType));
+            if(isEmpty(req.query.feedType) || isEmpty(req.query.eventType)) {
+                reject({httpCode: 400,code: 400,message: 'try again!'});
+            }
+            else {
+                let updateObj={};
+               Object.keys(req.query).forEach((key) => {
+                if(!(key=='lat'||key=='lang'||key=='maxDistance')) {
+                    if(!isEmpty(req.query[key])) {
+                        updateObj[key]=req.query[key];
+                    }
+                }
+            });
+            if(!isEmpty(req.query.lat) && !isEmpty(req.query.lang) && !isEmpty(req.query.maxDistance)) {
+                
+                events.find({$and:[updateObj, {"geoLocation":   {$near :{$geometry : {type : "Point" ,coordinates : [req.query.lat,req.query.lang]},$maxDistance : req.query.maxDistance}}}]},(err, results) => {
+
+                    console.log(results);
+
+             
+                    
+                   
+                    if(err) {
+                        reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
+                    } else {
+                        !results.length ? reject({ 'message': 'Contact Not Found', 'code': 210,"httpCode":200}) :
+                        resolve(results);
+                    }
+                });
+            }
+            else {
+
+                
+                events.find(updateObj,(err, results) => {
+
+                    console.log(results);
+                   
+                    if(err) {
+                        reject({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
+                    } else {
+                        !results.length ? reject({ 'message': 'Contact Not Found', 'code': 210,"httpCode":200}) :
+                        resolve(results);
+                    }
+                });
+            }
+            
+            }
+            
+        });
+            contactIdCheck.then((results) => {
+
+
+                // console.log(results);
+
+                
+                res.send({'code':200,'message':'Success','data':results});
+            })
+                
+                
+            .catch(function (err) {
+                console.log('errerrerrerr', err)
+                res.status(err.httpCode).json(err);
+            });
+    } catch (err) {
+        res.status(500).json({ httpCode: CodesAndMessages.dbErrHttpCode, code: CodesAndMessages.dbErrCode, message: CodesAndMessages.dbErrMessage });
+        console.log('catch editContact', err);
+    }
+}
 
 
 

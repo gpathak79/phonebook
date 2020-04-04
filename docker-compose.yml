@@ -1,0 +1,47 @@
+version: '3.7'
+services:
+
+        #phonebook-api
+        
+            phonebook-api:
+
+                container_name: phonebook-backend
+
+                # image: node: 12.14.1
+
+                build: ./
+
+                command: node ./bin/phonebook
+
+                working_dir: /app/src/phonebook-old
+
+                ports: 
+                    - "3000:3000"
+
+                volumes: 
+                    - ./:/app/src/phonebook-old
+
+                #mongo
+
+                links:
+                    - mongo
+
+            mongo:
+                    container_name: mongo-phonebook
+
+                    image: mongo
+
+                    ports:
+                        - "27017:27017"  
+
+                    volumes: 
+                        - /Users/raghavpathak/data/db
+
+                
+                    
+
+
+
+                
+
+                

@@ -1,0 +1,30 @@
+db.getCollection('events').find({ "geoLocation":   {"$near" :{"$geometry" : {"type" : "Point" ,"coordinates" : [28.673559,77.368549]},"$maxDistance" : 160934}})
+
+
+db.events.createIndex({geoLocation:"2dsphere"});
+
+"$or":[ {
+
+
+"$and": [
+
+
+
+
+    { "geoLocation":   {$near :{$geometry : {type : "Point" ,coordinates : [req.query.lat,req.query.lang]},$maxDistance : req.query.maxDistance}} }
+
+
+],
+
+"$and": [ {"feedType":"My Timeline"} ]
+
+}
+]
+
+
+
+
+{"eventType":"My Timeline"}
+
+
+

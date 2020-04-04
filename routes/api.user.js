@@ -13,5 +13,6 @@ module.exports = (router) => {
     router.delete('/delete-contact',auth.isAuthenticated,auth.checkToken,UserCltr.DeleteContact);
     router.get('/get-contact',auth.isAuthenticated,auth.checkToken,UserCltr.getAllContact);
     router.post('/upload-image',auth.isAuthenticated,auth.checkToken,UserCltr.mediaUpload);
+    router.get('/filter-event',UserVal.filters,UserCltr.eventFilter);
     return router;
 }
